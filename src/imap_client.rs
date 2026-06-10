@@ -123,6 +123,7 @@ pub fn search_messages(session: &mut ImapSession, query: &str) -> Result<Vec<Ema
 }
 
 pub fn fetch_full(session: &mut ImapSession, uid: u32) -> Result<ParsedEmail> {
+    session.select("INBOX")?;
     let msgs = session.uid_fetch(uid.to_string(), "RFC822")?;
     let msg = msgs.first().context("邮件不存在")?;
     let raw = msg.body().context("邮件内容为空")?;
@@ -155,17 +156,18 @@ fn parse_summary(msg: &imap::types::Fetch) -> Option<EmailSummary> {
 }
 
 fn translate_query(query: &str) -> String {
-    let q = query.trim();
-    if q.eq_ignore_ascii_case("is:unread") { return "UNSEEN".into(); }
-    if q.eq_ignore_ascii_case("is:read")   { return "SEEN".into(); }
-
     let mut parts = Vec::new();
-    for token in q.split_whitespace() {
-        if let Some(v) = token.strip_prefix("from:")    { parts.push(format!("FROM \"{v}\"")); }
-        else if let Some(v) = token.strip_prefix("to:") { parts.push(format!("TO \"{v}\"")); }
-        else if let Some(v) = token.strip_prefix("subject:") { parts.push(format!("SUBJECT \"{v}\"")); }
-        else { parts.push(format!("TEXT \"{token}\"")); }
+    for token in query.trim().split_whitespace() {
+        match token.to_ascii_lowercase().as_str() {
+            "is:unread" => parts.push("UNSEEN".into()),
+            "is:read"   => parts.push("SEEN".into()),
+            _ => {
+                if let Some(v) = token.strip_prefix("from:")         { parts.push(format!("FROM \"{v}\"")); }
+                else if let Some(v) = token.strip_prefix("to:")      { parts.push(format!("TO \"{v}\"")); }
+                else if let Some(v) = token.strip_prefix("subject:") { parts.push(format!("SUBJECT \"{v}\"")); }
+                else                                                  { parts.push(format!("TEXT \"{token}\"")); }
+            }
+        }
     }
-
     if parts.is_empty() { "ALL".into() } else { parts.join(" ") }
 }
