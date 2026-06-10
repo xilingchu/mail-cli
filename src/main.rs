@@ -23,7 +23,36 @@ fn main() {
     }
 }
 
+fn print_help() {
+    println!("{}", style("mail-cli").cyan().bold());
+    println!();
+    println!("{}", style("用法:").bold());
+    println!("  mail                       交互模式");
+    println!("  mail inbox  (i)            最近 50 封邮件");
+    println!("  mail search (s) <搜索词>   搜索邮件");
+    println!("  mail read   (r) <uid>      读取邮件全文");
+    println!("  mail help                  显示此帮助");
+    println!();
+    println!("{}", style("搜索语法:").bold());
+    println!("  from:<发件人>              按发件人");
+    println!("  to:<收件人>                按收件人");
+    println!("  subject:<关键词>           按主题");
+    println!("  is:unread                  未读邮件");
+    println!("  is:read                    已读邮件");
+    println!("  <关键词>                   全文搜索");
+    println!();
+    println!("{}", style("示例:").bold());
+    println!("  mail s \"is:unread from:alice\"");
+    println!("  mail s \"subject:发票\"");
+    println!("  mail r 12345");
+}
+
 fn run_cmd(args: &[String]) -> Result<()> {
+    if matches!(args[0].as_str(), "help" | "--help" | "-h") {
+        print_help();
+        return Ok(());
+    }
+
     let config = config::load_or_setup()?;
     let pb = spinner("连接邮件服务器…");
     let mut session = imap_client::connect(&config)?;
@@ -75,7 +104,7 @@ fn run_cmd(args: &[String]) -> Result<()> {
             }
         }
         cmd => anyhow::bail!(
-            "未知命令: {cmd}\n用法:\n  mail inbox\n  mail search <搜索词>\n  mail read <uid>"
+            "未知命令: {cmd}\n运行 mail help 查看用法"
         ),
     }
 

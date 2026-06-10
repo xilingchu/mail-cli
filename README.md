@@ -45,9 +45,12 @@ Navigate with arrow keys, Enter to select.
 mail inbox                   # latest 50 emails with UIDs
 mail search <query>          # search emails
 mail read <uid>              # read full email by UID (marks as read)
+mail help                    # show usage
 ```
 
-**Search syntax:**
+Short aliases: `mail i`, `mail s <query>`, `mail r <uid>`, `mail --help`.
+
+**Search syntax** — multiple terms are ANDed:
 
 | Query | Matches |
 |-------|---------|
@@ -58,7 +61,10 @@ mail read <uid>              # read full email by UID (marks as read)
 | `is:read` | read emails |
 | `meeting` | free-text search |
 
-Short aliases: `mail i`, `mail s <query>`, `mail r <uid>`.
+```bash
+mail s "is:unread from:alice"      # unread emails from alice
+mail s "subject:invoice is:unread" # unread emails with invoice in subject
+```
 
 ## Configuration
 
