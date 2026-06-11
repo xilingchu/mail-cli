@@ -39,11 +39,15 @@ fn print_help() {
     println!("  subject:<关键词>           按主题");
     println!("  is:unread                  未读邮件");
     println!("  is:read                    已读邮件");
+    println!("  after:<YYYY-MM-DD>         此日期之后");
+    println!("  before:<YYYY-MM-DD>        此日期之前");
+    println!("  on:<YYYY-MM-DD>            指定日期");
     println!("  <关键词>                   全文搜索");
     println!();
     println!("{}", style("示例:").bold());
     println!("  mail s \"is:unread from:alice\"");
     println!("  mail s \"subject:发票\"");
+    println!("  mail s \"after:2026-01-01 before:2026-06-01\"");
     println!("  mail r 12345");
 }
 
