@@ -103,7 +103,7 @@ pub fn ask(prompt: &str) -> String {
 }
 
 pub fn ask_search() -> String {
-    ask("搜索 (支持 from: to: subject: is:unread)")
+    ask("搜索 (支持 from: to: subject: is:unread on:YYYY-MM-DD after:YYYY-MM-DD before:YYYY-MM-DD)")
 }
 
 pub fn ask_body() -> String {

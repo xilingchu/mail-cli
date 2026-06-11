@@ -59,11 +59,16 @@ Short aliases: `mail i`, `mail s <query>`, `mail r <uid>`, `mail --help`.
 | `subject:invoice` | subject contains "invoice" |
 | `is:unread` | unread emails |
 | `is:read` | read emails |
+| `on:YYYY-MM-DD` | emails on a specific date |
+| `after:YYYY-MM-DD` | emails on or after a date |
+| `before:YYYY-MM-DD` | emails before a date |
 | `meeting` | free-text search |
 
 ```bash
-mail s "is:unread from:alice"      # unread emails from alice
-mail s "subject:invoice is:unread" # unread emails with invoice in subject
+mail s "is:unread from:alice"           # unread emails from alice
+mail s "subject:invoice is:unread"      # unread emails with invoice in subject
+mail s "on:2024-03-15"                  # emails on a specific day
+mail s "after:2024-01-01 before:2024-04-01 from:boss@example.com"
 ```
 
 ## Configuration

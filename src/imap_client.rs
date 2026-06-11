@@ -155,16 +155,41 @@ fn parse_summary(msg: &imap::types::Fetch) -> Option<EmailSummary> {
     Some(EmailSummary { uid, from, subject, date, is_unread })
 }
 
+fn to_imap_date(s: &str) -> Option<String> {
+    // accepts YYYY-MM-DD
+    let parts: Vec<&str> = s.split('-').collect();
+    if parts.len() != 3 { return None; }
+    let y = parts[0];
+    let m: u32 = parts[1].parse().ok()?;
+    let d: u32 = parts[2].parse().ok()?;
+    if y.len() != 4 || m < 1 || m > 12 || d < 1 || d > 31 { return None; }
+    let months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    Some(format!("{:02}-{}-{}", d, months[(m - 1) as usize], y))
+}
+
 fn translate_query(query: &str) -> String {
     let mut parts = Vec::new();
     for token in query.trim().split_whitespace() {
-        match token.to_ascii_lowercase().as_str() {
+        let lower = token.to_ascii_lowercase();
+        match lower.as_str() {
             "is:unread" => parts.push("UNSEEN".into()),
             "is:read"   => parts.push("SEEN".into()),
             _ => {
                 if let Some(v) = token.strip_prefix("from:")         { parts.push(format!("FROM \"{v}\"")); }
                 else if let Some(v) = token.strip_prefix("to:")      { parts.push(format!("TO \"{v}\"")); }
                 else if let Some(v) = token.strip_prefix("subject:") { parts.push(format!("SUBJECT \"{v}\"")); }
+                else if let Some(v) = lower.strip_prefix("after:") {
+                    if let Some(d) = to_imap_date(v) { parts.push(format!("SINCE {d}")); }
+                    else { parts.push(format!("TEXT \"{token}\"")); }
+                }
+                else if let Some(v) = lower.strip_prefix("before:") {
+                    if let Some(d) = to_imap_date(v) { parts.push(format!("BEFORE {d}")); }
+                    else { parts.push(format!("TEXT \"{token}\"")); }
+                }
+                else if let Some(v) = lower.strip_prefix("on:") {
+                    if let Some(d) = to_imap_date(v) { parts.push(format!("ON {d}")); }
+                    else { parts.push(format!("TEXT \"{token}\"")); }
+                }
                 else                                                  { parts.push(format!("TEXT \"{token}\"")); }
             }
         }
